@@ -25,7 +25,7 @@ This project is a web-based version of the 2048 game, built using React. The gam
 
 1. Clone the repository:
    ```
-   git clone [(https://github.com/Dyluan/512-React.git)]
+   git clone https://github.com/Dyluan/512-React.git
    ```
 2. Navigate to the project directory:
    ```
