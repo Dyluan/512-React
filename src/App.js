@@ -1,156 +1,201 @@
 import './App.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function App() {
+  const [board, setBoard] = useState(Array(9).fill(0));
 
-  const [board, setBoard] = useState(Array(9).fill(2));
+  function isOpposes(liste) {
+    return liste[0] === liste[2] && liste[1] === 0 && liste[0] !== 0;
+  }
 
-  function isOpposes (liste) {
-    //x-0-x 
-    if (liste[0] == liste[2] && liste[1] == 0 && liste[0] != 0) {
-        return true;
-    }
-    else {
-        return false;
-    }
+  function isPremiers(liste) {
+    return liste[0] === liste[1] && liste[0] !== 0;
   }
-  function isPremiers (liste) {
-    if (liste[0] == liste[1] && liste[0] != 0) {
-        return true;
-    }
-    else {
-        return false;
-    }
+
+  function isDerniers(liste) {
+    return liste[1] === liste[2] && liste[1] !== 0;
   }
-  function isDerniers (liste) {
-    //y-x-x
-    if (liste[1] == liste[2] && liste[1] != 0) {
-        return true;
-    }
-    else {
-        return false;
-    }
-  }
+
   function addition(liste) {
     if (isOpposes(liste)) {
-      // console.log('opposés : ', liste)
       liste[2] *= 2;
       liste[1] = 0;
       liste[0] = 0;
-      
-      return liste;
-    }
-    //fonctionne
-    if (isDerniers(liste)) {
-      // console.log('derniers', liste);
+    } else if (isDerniers(liste)) {
       liste[2] *= 2;
       liste[1] = liste[0];
       liste[0] = 0;
-      
-      return liste;
-    }
-    //fonctionne
-    if(isPremiers(liste)) {
-      // console.log('premiers : ', liste)
-      if (liste[2] == 0) {
-          liste[2] = liste[1]*2;
-          liste[1] = 0;
-          liste[0] = 0;
+    } else if (isPremiers(liste)) {
+      if (liste[2] === 0) {
+        liste[2] = liste[1] * 2;
+        liste[1] = 0;
+        liste[0] = 0;
+      } else {
+        liste[1] *= 2;
+        liste[0] = 0;
       }
-      else {
-          liste[1] *= 2;
-          liste[0] = 0;
-      }
-    }
-    //si aucun doublons
-    else {
-      // 2-4-0 => 0-2-4
-      if (liste[2] == 0 && liste[0]!=0 && liste[1]!=0) {
-          liste[2] = liste[1];
-          liste[1] = liste[0];
-          liste[0] = 0;
-      }
-      // 2-0-4 => 0-2-4
-      else if (liste[1] == 0 && liste[0] != 0 && liste[2] != 0) {
-          liste[1] = liste[0];
-          liste[0] = 0;
-      }
-      //ici on teste les cas de figure où on a 2*0 sur la mm ligne
-      else {
-          //0-2-0
-          if (liste[1]!=0 && liste[0]==0 && liste[2]==0) {
-              liste[2] = liste[1];
-              liste[1] = 0;
-              liste[0] = 0;
-          }
-          //2-0-0
-          else if(liste[0]!=0 && liste[1]==0 && liste[2]==0) {
-              liste[2]=liste[0];
-              liste[1]=0;
-              liste[0]=0;
-          }
+    } else {
+      if (liste[2] === 0 && liste[0] !== 0 && liste[1] !== 0) {
+        liste[2] = liste[1];
+        liste[1] = liste[0];
+        liste[0] = 0;
+      } else if (liste[1] === 0 && liste[0] !== 0 && liste[2] !== 0) {
+        liste[1] = liste[0];
+        liste[0] = 0;
+      } else if (liste[1] !== 0 && liste[0] === 0 && liste[2] === 0) {
+        liste[2] = liste[1];
+        liste[1] = 0;
+        liste[0] = 0;
+      } else if (liste[0] !== 0 && liste[1] === 0 && liste[2] === 0) {
+        liste[2] = liste[0];
+        liste[1] = 0;
+        liste[0] = 0;
       }
     }
-  return liste;
+    return liste;
   }
 
   const moveBoard = (e) => {
-    switch(e.key) {
-      case 'ArrowLeft' :
-        for (let i=board.length-1; i>0; i-=3) {
-          let firstElem = board[i];
-          let secondElem = board[i-1];
-          let thirdElem = board[i-2];
-          
-          let arr = [parseInt(firstElem), parseInt(secondElem), parseInt(thirdElem)];
-          let shifted = addition(arr);
 
-          // firstElem = shifted[0];
-          // secondElem = shifted[1];
-          // thirdElem = shifted[2];
-          
+    switch (e.key) {
+      case 'ArrowLeft':
+        for (let i = board.length - 1; i > 0; i -= 3) {
+          let arr = [board[i], board[i - 1], board[i - 2]].map(Number);
+          let shifted = addition(arr);
           setBoard(prevBoard => {
             const newBoard = [...prevBoard];
             newBoard[i] = shifted[0];
-            newBoard[i-1] = shifted[1];
-            newBoard[i-2] = shifted[2];
+            newBoard[i - 1] = shifted[1];
+            newBoard[i - 2] = shifted[2];
             return newBoard;
           });
+        }
+        break;
 
-          console.log(board)
-      }
+      case "ArrowRight":
+        for (let i = 0; i < board.length; i += 3) {
+          let arr = [board[i], board[i + 1], board[i + 2]].map(Number);
+          let shifted = addition(arr);
+          setBoard(prevBoard => {
+            const newBoard = [...prevBoard];
+            newBoard[i] = shifted[0];
+            newBoard[i + 1] = shifted[1];
+            newBoard[i + 2] = shifted[2];
+            return newBoard;
+          });
+        }
+        break;
 
-      break;
+      case "ArrowUp":
+        for (let i = board.length - 1; i > 5; i -= 1) {
+          let arr = [board[i], board[i - 3], board[i - 6]].map(Number);
+          let shifted = addition(arr);
+          setBoard(prevBoard => {
+            const newBoard = [...prevBoard];
+            newBoard[i] = shifted[0];
+            newBoard[i - 3] = shifted[1];
+            newBoard[i - 6] = shifted[2];
+            return newBoard;
+          });
+        }
+        break;
+
+      case "ArrowDown":
+        for (let i = 0; i < board.length - 6; i += 1) {
+          let arr = [board[i], board[i + 3], board[i + 6]].map(Number);
+          let shifted = addition(arr);
+          setBoard(prevBoard => {
+            const newBoard = [...prevBoard];
+            newBoard[i] = shifted[0];
+            newBoard[i + 3] = shifted[1];
+            newBoard[i + 6] = shifted[2];
+            return newBoard;
+          });
+        }
+        break;
+
+      default:
+        break;
     }
   }
 
-  const bodyListener = () => {
-    document.body.addEventListener('keydown', (e) => {
-      e.preventDefault();
-      console.log('jappuie ', e);
+  function randomRoundNumber() {
+    return Math.random() >= 0.9 ? 4 : 2;
+  }
+
+  const addElement = (board) => {
+
+    let twoOrFour = randomRoundNumber();
+    let emptyIndices = board.reduce((acc, val, idx) => val === 0 ? [...acc, idx] : acc, []);
+    if (emptyIndices.length > 0) {
+      let randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+      setBoard(prevBoard => {
+        const newBoard = [...prevBoard];
+        newBoard[randomIndex] = twoOrFour;
+        return newBoard;
+      });
+    }
+  }
+
+  const colorize = (val) => {
+    let elem;
+        switch(val) {
+            case 0:
+              return '#e5e5e5';
+            case 2:
+              return '#ffba08';
+            case 4:
+              return '#faa307';
+            case 8:
+              return '#f48c06';
+            case 16:
+              return '#e85d04';
+            case 32:
+              return '#dc2f02';
+            case 64:
+              return '#d00000';
+            case 128:
+              return '#9d0208';
+            case 256:
+              return '#6a040f';
+            case 512:
+              return  '#ffba08';
+            default:
+                break;
+        }
+  }
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+
       moveBoard(e);
-    })
+      addElement(board);
+    };
+
+    document.body.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [board]);
+
+  const restartGame = () => {
+    setBoard(Array(9).fill(0));
   }
 
   return (
-    <>
-      <div className="tictactoe flex flex-col justify-center items-center">
-        <h1><button onClick={bodyListener}>JOUER</button></h1>
-        <div class="board grid grid-cols-3 grid-cols-3 w-28 h-28">
-            <div class="cell border-black border-solid border flex justify-center items-center text-3xl">0</div>
-            <div class="cell border-black border-solid border flex justify-center items-center text-3xl">0</div>
-            <div class="cell border-black border-solid border flex justify-center items-center text-3xl">0</div>
-            <div class="cell border-black border-solid border flex justify-center items-center text-3xl">0</div>
-            <div class="cell border-black border-solid border flex justify-center items-center text-3xl">0</div>
-            <div class="cell border-black border-solid border flex justify-center items-center text-3xl">0</div>
-            <div class="cell border-black border-solid border flex justify-center items-center text-3xl">0</div>
-            <div class="cell border-black border-solid border flex justify-center items-center text-3xl">0</div>
-            <div class="cell border-black border-solid border flex justify-center items-center text-3xl">0</div>
-        </div>
-        <p class="message">Score : </p>
-        <button class="restart">Restart</button>
+    <div className="tictactoe flex flex-col justify-center items-center">
+      <h1>2048 Game</h1>
+      <div className="board grid grid-cols-3 w-28 h-28">
+        {board.map((value, index) => (
+          <div key={index} className="cell border-black border-solid border flex justify-center items-center text-3xl" style={{backgroundColor:colorize(value)}}>
+            {value !== 0 ? value : ''}
+          </div>
+        ))}
+      </div>
+      <p className="message">Score: {board.reduce((sum, value) => sum + value, 0)}</p>
+      <button className="restart" onClick={restartGame}>Restart</button>
     </div>
-    </>
   )
 }
 
