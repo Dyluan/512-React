@@ -189,7 +189,8 @@ function App() {
       <div className="board grid grid-cols-3 w-28 h-28">
         {board.map((value, index) => (
           <div key={index} className="cell border-black border-solid border flex justify-center items-center text-3xl" style={{backgroundColor:colorize(value)}}>
-            {value !== 0 ? value : ''}
+            {/* {value !== 0 ? value : ''} */}
+            {value}
           </div>
         ))}
       </div>
