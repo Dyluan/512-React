@@ -1,7 +1,7 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
 
-function App() {
+function Test() {
   const [board, setBoard] = useState(Array(9).fill(0));
 
   function isOpposes(liste) {
@@ -189,7 +189,7 @@ function App() {
       <div className="board grid grid-cols-3 w-28 h-28">
         {board.map((value, index) => (
           <div key={index} className="cell border-black border-solid border flex justify-center items-center text-3xl" style={{backgroundColor:colorize(value)}}>
-            {value}
+            {value !== 0 ? value : ''}
           </div>
         ))}
       </div>
@@ -199,4 +199,4 @@ function App() {
   )
 }
 
-export default App;
+export default Test;
