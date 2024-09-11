@@ -1,141 +1,149 @@
 import './App.css';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 function App() {
   const [board, setBoard] = useState(Array(9).fill(0));
+  const [gameStarted, setGameStarted] = useState(false);
+  const [lastMove, setLastMove] = useState(null);
 
-  function isOpposes(liste) {
-    return liste[0] === liste[2] && liste[1] === 0 && liste[0] !== 0;
-  }
+  const isOpposes = (liste) => liste[0] === liste[2] && liste[1] === 0 && liste[0] !== 0;
+  const isPremiers = (liste) => liste[0] === liste[1] && liste[0] !== 0;
+  const isDerniers = (liste) => liste[1] === liste[2] && liste[1] !== 0;
 
-  function isPremiers(liste) {
-    return liste[0] === liste[1] && liste[0] !== 0;
-  }
-
-  function isDerniers(liste) {
-    return liste[1] === liste[2] && liste[1] !== 0;
-  }
-
-  function addition(liste) {
-    if (isOpposes(liste)) {
-      liste[2] *= 2;
-      liste[1] = 0;
-      liste[0] = 0;
-    } else if (isDerniers(liste)) {
-      liste[2] *= 2;
-      liste[1] = liste[0];
-      liste[0] = 0;
-    } else if (isPremiers(liste)) {
-      if (liste[2] === 0) {
-        liste[2] = liste[1] * 2;
-        liste[1] = 0;
-        liste[0] = 0;
+  const addition = useCallback((liste) => {
+    const result = [...liste];
+    if (isOpposes(result)) {
+      result[2] *= 2;
+      result[1] = 0;
+      result[0] = 0;
+    } else if (isDerniers(result)) {
+      result[2] *= 2;
+      result[1] = result[0];
+      result[0] = 0;
+    } else if (isPremiers(result)) {
+      if (result[2] === 0) {
+        result[2] = result[1] * 2;
+        result[1] = 0;
+        result[0] = 0;
       } else {
-        liste[1] *= 2;
-        liste[0] = 0;
+        result[1] *= 2;
+        result[0] = 0;
       }
     } else {
-      if (liste[2] === 0 && liste[0] !== 0 && liste[1] !== 0) {
-        liste[2] = liste[1];
-        liste[1] = liste[0];
-        liste[0] = 0;
-      } else if (liste[1] === 0 && liste[0] !== 0 && liste[2] !== 0) {
-        liste[1] = liste[0];
-        liste[0] = 0;
-      } else if (liste[1] !== 0 && liste[0] === 0 && liste[2] === 0) {
-        liste[2] = liste[1];
-        liste[1] = 0;
-        liste[0] = 0;
-      } else if (liste[0] !== 0 && liste[1] === 0 && liste[2] === 0) {
-        liste[2] = liste[0];
-        liste[1] = 0;
-        liste[0] = 0;
+      if (result[2] === 0 && result[0] !== 0 && result[1] !== 0) {
+        result[2] = result[1];
+        result[1] = result[0];
+        result[0] = 0;
+      } else if (result[1] === 0 && result[0] !== 0 && result[2] !== 0) {
+        result[1] = result[0];
+        result[0] = 0;
+      } else if (result[1] !== 0 && result[0] === 0 && result[2] === 0) {
+        result[2] = result[1];
+        result[1] = 0;
+      } else if (result[0] !== 0 && result[1] === 0 && result[2] === 0) {
+        result[2] = result[0];
+        result[1] = 0;
+        result[0] = 0;
       }
     }
-    return liste;
-  }
+    return result;
+  }, []);
 
-  const moveBoard = (e) => {
+  const moveBoard = useCallback((direction) => {
+    setBoard(prevBoard => {
+      const newBoard = [...prevBoard];
+      let changed = false;
 
-    switch (e.key) {
-      case 'ArrowLeft':
-        for (let i = board.length - 1; i > 0; i -= 3) {
-          let arr = [board[i], board[i - 1], board[i - 2]].map(Number);
-          let shifted = addition(arr);
-          setBoard(prevBoard => {
-            const newBoard = [...prevBoard];
-            newBoard[i] = shifted[0];
-            newBoard[i - 1] = shifted[1];
-            newBoard[i - 2] = shifted[2];
-            return newBoard;
-          });
+      const processRow = (start, step) => {
+        const row = [newBoard[start], newBoard[start + step], newBoard[start + 2 * step]];
+        const shiftedRow = addition(row);
+        if (JSON.stringify(row) !== JSON.stringify(shiftedRow)) {
+          changed = true;
+          newBoard[start] = shiftedRow[0];
+          newBoard[start + step] = shiftedRow[1];
+          newBoard[start + 2 * step] = shiftedRow[2];
         }
-        break;
+      };
 
-      case "ArrowRight":
-        for (let i = 0; i < board.length; i += 3) {
-          let arr = [board[i], board[i + 1], board[i + 2]].map(Number);
-          let shifted = addition(arr);
-          setBoard(prevBoard => {
-            const newBoard = [...prevBoard];
-            newBoard[i] = shifted[0];
-            newBoard[i + 1] = shifted[1];
-            newBoard[i + 2] = shifted[2];
-            return newBoard;
-          });
-        }
-        break;
+      switch (direction) {
+        case 'ArrowLeft':
+          for (let i = 2; i < 9; i += 3) processRow(i, -1);
+          break;
+        case 'ArrowRight':
+          
+          for (let i = 0; i < 9; i += 3) processRow(i, 1);
+          break;
+        case 'ArrowUp':
+          for (let i = 6; i < 9; i++) processRow(i, -3);  
+          break;
+        case 'ArrowDown':
+          for (let i = 0; i < 3; i++) processRow(i, 3);  
+          break;
+        default:
+          return prevBoard;
+      }
 
-      case "ArrowUp":
-        for (let i = board.length - 1; i > 5; i -= 1) {
-          let arr = [board[i], board[i - 3], board[i - 6]].map(Number);
-          let shifted = addition(arr);
-          setBoard(prevBoard => {
-            const newBoard = [...prevBoard];
-            newBoard[i] = shifted[0];
-            newBoard[i - 3] = shifted[1];
-            newBoard[i - 6] = shifted[2];
-            return newBoard;
-          });
-        }
-        break;
+      if (changed) {
+        setLastMove(direction);
+      }
+      return changed ? newBoard : prevBoard;
+    });
+  }, [addition]);
 
-      case "ArrowDown":
-        for (let i = 0; i < board.length - 6; i += 1) {
-          let arr = [board[i], board[i + 3], board[i + 6]].map(Number);
-          let shifted = addition(arr);
-          setBoard(prevBoard => {
-            const newBoard = [...prevBoard];
-            newBoard[i] = shifted[0];
-            newBoard[i + 3] = shifted[1];
-            newBoard[i + 6] = shifted[2];
-            return newBoard;
-          });
-        }
-        break;
+  const addElement = useCallback(() => {
+    setBoard(prevBoard => {
+      const newBoard = [...prevBoard];
+      const emptyIndices = newBoard.reduce((acc, val, idx) => val === 0 ? [...acc, idx] : acc, []);
+      if (emptyIndices.length > 0) {
+        const randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+        const newValue = Math.random() >= 0.9 ? 4 : 2;
+        newBoard[randomIndex] = newValue;
+      }
+      return newBoard;
+    });
+  }, []);
 
-      default:
-        break;
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+        moveBoard(e.key);
+      }
+    };
+
+    if (gameStarted) {
+      document.addEventListener('keydown', handleKeyDown);
     }
-  }
+    
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [moveBoard, gameStarted]);
 
-  function randomRoundNumber() {
-    return Math.random() >= 0.9 ? 4 : 2;
-  }
-
-  const addElement = (board) => {
-
-    let twoOrFour = randomRoundNumber();
-    let emptyIndices = board.reduce((acc, val, idx) => val === 0 ? [...acc, idx] : acc, []);
-    if (emptyIndices.length > 0) {
-      let randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
-      setBoard(prevBoard => {
-        const newBoard = [...prevBoard];
-        newBoard[randomIndex] = twoOrFour;
-        return newBoard;
-      });
+  useEffect(() => {
+    if (gameStarted && lastMove) {
+      addElement();
+      setLastMove(null);
     }
-  }
+  }, [gameStarted, lastMove, addElement]);
+
+  const initializeGame = useCallback(() => {
+    const newBoard = Array(9).fill(0);
+    for (let i = 0; i < 2; i++) {
+      const emptyIndices = newBoard.reduce((acc, val, idx) => val === 0 ? [...acc, idx] : acc, []);
+      const randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+      newBoard[randomIndex] = Math.random() >= 0.9 ? 4 : 2;
+    }
+    setBoard(newBoard);
+    setGameStarted(true);
+    setLastMove(null);
+  }, []);
+
+  const restartGame = () => {
+    setGameStarted(false);
+    setTimeout(initializeGame, 0);
+  };
+
+  useEffect(() => {
+    initializeGame();
+  }, [initializeGame]);
 
   const colorize = (val) => {
     let elem;
@@ -161,37 +169,21 @@ function App() {
             case 512:
               return  '#ffba08';
             default:
-                break;
+                return '#cdc1b5';
         }
-  }
-
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-
-      moveBoard(e);
-      addElement(board);
-    };
-
-    document.body.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.body.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [board]);
-
-  const restartGame = () => {
-    setBoard(Array(9).fill(0));
   }
 
   return (
     <div className="tictactoe flex flex-col justify-center items-center">
-      <h1>2048 Game</h1>
-      <div className="board grid grid-cols-3 w-28 h-28">
+      <h1>512</h1>
+      <div className='boardContainer flex flex-col justify-center items-center w-32 h-32'>
+      <div className="board grid grid-cols-3">
         {board.map((value, index) => (
-          <div key={index} className="cell border-black border-solid border flex justify-center items-center text-3xl" style={{backgroundColor:colorize(value)}}>
+          <div key={index} className="cell border-black border-solid border-2 flex justify-center items-center text-3xl" style={{backgroundColor:colorize(value)}}>
             {value}
           </div>
         ))}
+      </div>
       </div>
       <p className="message">Score: {board.reduce((sum, value) => sum + value, 0)}</p>
       <button className="restart" onClick={restartGame}>Restart</button>
