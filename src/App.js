@@ -5,10 +5,30 @@ function App() {
   const [board, setBoard] = useState(Array(9).fill(0));
   const [gameStarted, setGameStarted] = useState(false);
   const [lastMove, setLastMove] = useState(null);
+  const [gameOver, setGameOver] = useState(false);
 
   const isOpposes = (liste) => liste[0] === liste[2] && liste[1] === 0 && liste[0] !== 0;
   const isPremiers = (liste) => liste[0] === liste[1] && liste[0] !== 0;
   const isDerniers = (liste) => liste[1] === liste[2] && liste[1] !== 0;
+
+  const isGameOver = useCallback(() => {
+    // Check if there are any empty cells
+    if (board.includes(0)) return false;
+    console.log('avant le if')
+
+    // Check for possible moves horizontally and vertically
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 2; j++) {
+        // Check horizontal
+        if (board[i * 3 + j] === board[i * 3 + j + 1]) return false;
+        // Check vertical
+        if (board[i + j * 3] === board[i + (j + 1) * 3]) return false;
+      }
+    }
+
+    // If we reach here, no moves are possible
+    return true;
+  }, [board]);
 
   const addition = useCallback((liste) => {
     const result = [...liste];
@@ -50,6 +70,7 @@ function App() {
   }, []);
 
   const moveBoard = useCallback((direction) => {
+    if (gameOver) return;
     setBoard(prevBoard => {
       const newBoard = [...prevBoard];
       let changed = false;
@@ -88,7 +109,7 @@ function App() {
       }
       return changed ? newBoard : prevBoard;
     });
-  }, [addition]);
+  }, [addition, gameOver]);
 
   const addElement = useCallback(() => {
     setBoard(prevBoard => {
@@ -122,7 +143,26 @@ function App() {
       addElement();
       setLastMove(null);
     }
+    //i should add an else case to cover the end of the game
   }, [gameStarted, lastMove, addElement]);
+
+  useEffect(() => {
+    if (!gameOver && gameStarted) {
+      const isOver = isGameOver();
+      if (isOver) {
+        setGameOver(true);
+        const score = board.reduce((sum, value) => sum + value, 0);
+        const prevScore = localStorage.getItem('score')
+        if (typeof(prevScore) === 'number') {
+          if (score > prevScore) {
+            localStorage.setItem('score', score);
+          }
+        }
+        console.log('Game over! Score:', score);
+        console.log('best score : ', prevScore);
+      }
+    }
+  }, [board, gameStarted, gameOver, isGameOver])
 
   const initializeGame = useCallback(() => {
     const newBoard = Array(9).fill(0);
@@ -139,6 +179,7 @@ function App() {
   const restartGame = () => {
     setGameStarted(false);
     setTimeout(initializeGame, 0);
+    setGameOver(false);
   };
 
   useEffect(() => {
@@ -146,7 +187,6 @@ function App() {
   }, [initializeGame]);
 
   const colorize = (val) => {
-    let elem;
         switch(val) {
             case 0:
               return '#e5e5e5';
