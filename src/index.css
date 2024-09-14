@@ -13,10 +13,7 @@ body {
   color: #f3f6ef;
   /* border-radius: 4px; */
 }
-.message {
-  padding-top: 28px;
-  padding-bottom: 12px;
-}
+
 .boardContainer {
   background-color: #b5a89b;
   width: 120px;

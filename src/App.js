@@ -153,13 +153,13 @@ function App() {
         setGameOver(true);
         const score = board.reduce((sum, value) => sum + value, 0);
         const prevScore = localStorage.getItem('score')
-        if (typeof(prevScore) === 'number') {
+        
           if (score > prevScore) {
             localStorage.setItem('score', score);
           }
-        }
+        
         console.log('Game over! Score:', score);
-        console.log('best score : ', prevScore);
+        
       }
     }
   }, [board, gameStarted, gameOver, isGameOver])
@@ -216,6 +216,20 @@ function App() {
   return (
     <div className="tictactoe flex flex-col justify-center items-center">
       <h1>512</h1>
+      <div className='scoreContainer flex w-32 '>
+        <div className='score'>
+          Score
+        <div className='realScore'>
+          {board.reduce((sum, value) => sum + value, 0)}
+        </div>
+        </div>
+        <div className='Prevscore'>
+          Best Score
+        <div className='RealPrevScore'>
+          {localStorage.getItem('score') ? localStorage.getItem('score') : 0}
+        </div>
+        </div>
+      </div>
       <div className='boardContainer flex flex-col justify-center items-center w-32 h-32'>
       <div className="board grid grid-cols-3">
         {board.map((value, index) => (
@@ -225,7 +239,6 @@ function App() {
         ))}
       </div>
       </div>
-      <p className="message">Score: {board.reduce((sum, value) => sum + value, 0)}</p>
       <button className="restart" onClick={restartGame}>Restart</button>
     </div>
   )
