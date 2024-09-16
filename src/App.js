@@ -216,18 +216,18 @@ function App() {
   return (
     <div className="tictactoe flex flex-col justify-center items-center">
       <h1>512</h1>
-      <div className='scoreContainer flex w-32 '>
+      <div className='scoreContainer flex flex-row items-center justify-around w-32 '>
         <div className='score'>
           Score
-        <div className='realScore'>
-          {board.reduce((sum, value) => sum + value, 0)}
-        </div>
+          <div className='realScore text-xl text-white my-3 flex justify-center items-center w-16'>
+            {board.reduce((sum, value) => sum + value, 0)}
+          </div>
         </div>
         <div className='Prevscore'>
-          Best Score
-        <div className='RealPrevScore'>
-          {localStorage.getItem('score') ? localStorage.getItem('score') : 0}
-        </div>
+          Best
+          <div className='realPrevScore text-xl text-white my-3 flex justify-center items-center w-16'>
+            {localStorage.getItem('score') ? localStorage.getItem('score') : 0}
+          </div>
         </div>
       </div>
       <div className='boardContainer flex flex-col justify-center items-center w-32 h-32'>

@@ -22,3 +22,9 @@ body {
   width: 98%;
   height: 98%;
 }
+.realPrevScore {
+  background-color: #d6cdc4;
+}
+.realScore {
+  background-color: #d6cdc4;
+}
